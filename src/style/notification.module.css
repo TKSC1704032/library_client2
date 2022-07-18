@@ -1,0 +1,8 @@
+.notificContainer {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 250px;
+  right: 150px;
+  bottom: 250px;
+  z-index: 999;
+}

@@ -1,0 +1,26 @@
+.box {
+  width: 100%;
+  min-height: 100vh;
+  background: white;
+}
+.logorsign {
+  color: red;
+  text-decoration-line: underline;
+  cursor: pointer;
+}
+.title {
+  text-align: center;
+}
+.card {
+  max-width: 500px;
+  padding: 20px;
+  margin: auto;
+  margin-top: 20px;
+  box-shadow: 2px 2px 10px black;
+}
+.card > div {
+  margin-top: 10px;
+}
+.card > p {
+  margin-top: 15px;
+}
