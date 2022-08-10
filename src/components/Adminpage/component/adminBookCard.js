@@ -4,7 +4,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Grid from '@mui/material/Grid';
 import * as React from 'react';
-export default function Bookcard({book}) {
+export default function AdminBookcard({book}) {
   return (
     <Grid item>
 <Card sx={{ maxWidth: 250,boxSizing:"border-box" ,paddingTop:'5px', boxShadow:"1px 1px 10px rgba(40, 42, 43, 0.642)"}}>
@@ -17,7 +17,9 @@ export default function Bookcard({book}) {
         <p style={{fontSize:'14px',fontFamily:'sans-serif'}}>{book.name}</p>
         <p style={{fontSize:'12px', fontWeight:700}}> by {book.author}</p>
         <p style={{fontSize:'10px', fontWeight:500}}>{book.edition} Edition</p>
-        
+        <p style={{fontSize:'10px', fontWeight:500}}>Total num of books :{book.number_of_books} </p>
+        <p style={{fontSize:'10px', fontWeight:500}}>Available Copies :{book.number_of_books_available}</p>
+
         {/* <Typography gutterBottom variant="overline" display='block' >
         Learning React:Functional Web Development with React and Redux
         </Typography>

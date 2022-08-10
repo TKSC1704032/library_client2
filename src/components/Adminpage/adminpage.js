@@ -1,13 +1,13 @@
 import Appbars from './appbar'
 import SearchBooks from './component/searchbooks'
-import Showbooks from './component/showbooks'
+import AdminShowbooks from './component/showAdminbook'
 export default function Adminpage() {
   return (
     <><div style={{backgroundColor:"GrayText"}}>
 
 <Appbars/>
 <SearchBooks/>
-<Showbooks/>
+<AdminShowbooks/>
     </div>
 
 

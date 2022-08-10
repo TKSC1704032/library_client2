@@ -1,18 +1,24 @@
 import React from 'react';
-import ResponsiveAppBar from './component/header';
-import Searchbar from './component/searchbar';
-import Showbooks from './component/showbooks';
-import './homepage.css';
+import { Outlet } from 'react-router-dom';
+import ScrollToTop from "react-scroll-to-top";
+import ControlledCarousel from './component/carousel';
+import Clock from './component/clock';
+import Footer from "./component/footer";
 
+import ResponsiveAppBar from './component/header';
+import './homepage.css';
 export default function Homepage() {
   
   return (
       <div className='homepage' style={{position:'relative'}}>
-      
-    <ResponsiveAppBar/>
-    <Searchbar/>
-    <Showbooks/>
-            
+     <ScrollToTop smooth />
+      <Clock/>
+   
+    <ResponsiveAppBar style={{position:'relative'}}/>
+    
+    <ControlledCarousel/>
+    <Outlet/>
+       <Footer/>     
     </div>
   )
 }

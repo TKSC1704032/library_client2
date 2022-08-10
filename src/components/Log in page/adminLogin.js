@@ -1,6 +1,8 @@
+import CloseIcon from '@mui/icons-material/Close';
 import Visibility from "@mui/icons-material/Visibility";
+
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { Grid, IconButton, Paper, TextField } from "@mui/material";
+import { Alert, AlertTitle, Grid, IconButton, Paper, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -10,10 +12,30 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAdmin } from '../../contexts/adminContext';
 import classes from "../../style/loginpage.module.css";
 export default function AdminLogin () {
  let navigate = useNavigate();
+ const {adminLogin}=useAdmin();
+ const [info, setInfo] = React.useState({status:'',message:''});
   const [showPassword, setShowPassword] = React.useState(false);
+  const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+  const [message,setMessage]=React.useState('');
+  const handleEmailValidation=()=>{
+    if (details.email===''){
+      setMessage("");
+    }
+
+    else if (!emailPattern.test(details.email)) {
+      setMessage("Invalid email. Please correct it.");
+    } else {
+      setMessage("");
+    }
+
+  }
+
+
   const handleClickShowPassword = () => {
     setShowPassword((prev) => {
       return !prev;
@@ -23,11 +45,7 @@ export default function AdminLogin () {
     event.preventDefault();
   };
   const [verified, setVerified] = React.useState(false);
-  const [message, setMessage] = React.useState({
-    warning: null,
-    error: null,
-    success: null,
-  });
+ 
   const [details, setDetails] = React.useState({
     email: null,
     password: null,
@@ -52,10 +70,18 @@ export default function AdminLogin () {
         <Grid item xs={false} md={2} />
         <Grid item xs={12} md={8}>
             <form
-              onSubmit={(e) => {
+              onSubmit={async(e) => {
                 e.preventDefault();
                 console.log(details);
-                navigate('/admin');
+                if(message===''){
+                const data= await adminLogin(details);
+                setInfo({status:data.status,message:data.message});
+                console.log(data);
+                if(data.status==='success'){
+                
+                  navigate('/admin/');
+                }
+              }
               }} >
               <div>
                 <TextField
@@ -68,7 +94,13 @@ export default function AdminLogin () {
                   value={details.email}
                   required
                   onChange={updateDetails}
+                  onBlur={handleEmailValidation}
                 />
+                  {message !== "" ? (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {message}
+                  </p>
+                ) : <></>}
               </div>
               <div>
                 <FormControl fullWidth variant="outlined">
@@ -95,6 +127,7 @@ export default function AdminLogin () {
                   />
                 </FormControl>
               </div>
+
               <br/>
               <div>
                   <Button type="submit" variant="contained" color="secondary">Log In</Button>
@@ -104,6 +137,30 @@ export default function AdminLogin () {
         <Grid item xs={false} md={2} />
       </Grid>
       </Paper>
+      {info.status!==''? (<Box sx={{ width: '60%',position:'fixed',left:'20px',bottom:'10px'}}>
+
+        <Alert
+        
+        severity={info.status==='failed'?"error":"success"}
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setInfo({status:'',message:''});
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        > <AlertTitle>Login {info.status}</AlertTitle>
+
+          {info.message}
+        </Alert>
+      
+    </Box>):<></>}
     </Box>
   );
 }

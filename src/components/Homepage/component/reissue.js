@@ -1,29 +1,25 @@
+import CloseIcon from '@mui/icons-material/Close';
 import ForwardIcon from '@mui/icons-material/Forward';
-import { Box, Button, Divider, Grid, Paper } from "@mui/material";
-import Avatar from '@mui/material/Avatar';
-import Checkbox from '@mui/material/Checkbox';
+import { LoadingButton } from '@mui/lab';
+import { Alert, AlertTitle, Box, Divider, Grid, IconButton, Paper } from "@mui/material";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from "@mui/material/Typography";
-import * as React from "react";
+import axios from 'axios';
+import React, { useState } from "react";
+
+import { useAuth } from '../../../contexts/authContext';
+
 export default function Reissue() {
-    const [checked, setChecked] = React.useState([1]);
-
-  const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
-  };
+    const {currentUser}=useAuth();
+    const issuedBooks= currentUser.issuedBooks;
+    const [loading, setLoading] = useState(false);
+    const [info, setInfo] = useState({status:'',message:''});
+    const reIssueBooks = issuedBooks.filter((book,index) => {return book.request_accepted===true});
+    
   return (
     <Grid container spacing={1} direction="row">
       <Grid item xs={0} md={2} />
@@ -31,32 +27,55 @@ export default function Reissue() {
       <Paper sx={{ width: '100%', }} elevation={24}>
       <Box sx={{ p: 2, border: '1px dashed grey' }}>
         <Typography variant="h4">Re-issue your books</Typography>
-      <Button>Re-issue all</Button>
     </Box>
     <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
-      {[0, 1, 2, 3].map((value) => {
-        const labelId = `checkbox-list-secondary-label-${value}`;
+    {reIssueBooks.length===0?<h2 style={{textAlign:"center"}}>No Book For Reissue</h2>:
+       reIssueBooks.length&&reIssueBooks.map((book,index) => {
         return (
           <><ListItem
-            key={value}
-            secondaryAction={
-              <Checkbox
-                edge="end"
-                onChange={handleToggle(value)}
-                checked={checked.indexOf(value) !== -1}
-                inputProps={{ 'aria-labelledby': labelId }}
-              />
-            }
+            key={book._id}
+            
             disablePadding
           >
             <ListItemButton>
               <ListItemAvatar>
-                <Avatar
-                  alt={`Avatar n°${value + 1}`}
-                  src={process.env.PUBLIC_URL + '/Image/book1.jpg'}
+                <img style={{width:'40px',padding:'5px', marginRight:'30px' ,fontSize:'10px'}}
+                  alt={book.bookName}
+                  src={`https://drive.google.com/uc?export=view&id=${book.bookCoverId}`}
                 />
               </ListItemAvatar>
-              <ListItemText id={labelId} primary=' Learning React: Functional Web Development with React and Redux' secondary='by Alex Banks (Goodreads Author), Eve Porcello'/>
+              <ListItemText id={book._id} primary={book.bookName} secondary={`by ${book.bookAuthor}`}/>
+              <LoadingButton
+                 sx={{marginRight:"20px"}}
+                  type="button"
+                  variant='outlined' size="small" startIcon={<ForwardIcon/>}
+                  loading={loading}
+                  loadingPosition="end"
+                  onClick={()=>{
+                    setLoading(true);
+                    
+                    axios.post("https://warm-sea-39505.herokuapp.com/api/student/re-issue-book-request/",{
+                      "requestID":book._id
+                    },
+  {credentials: 'include',withCredentials: true})
+.then(function(res){
+  
+  setLoading(false);
+    
+    setInfo({status:res.data.status,message:res.data.message});
+})
+.catch(function(err){
+  setInfo({status:err.response.data.status,message:err.response.data.message});
+ 
+  setLoading(false);
+ })
+                  }}
+                >
+                  Send Re-sissue Request
+                </LoadingButton>
+             
+             
+             
             </ListItemButton>
           </ListItem>
           <Divider/>
@@ -65,11 +84,35 @@ export default function Reissue() {
       })}
     </List>
         <Box sx={{ p: 2, border: '1px dashed grey' }}>
-      <Button variant="outlined" startIcon={<ForwardIcon/>}>Re-issue Selected items</Button>
+      <br/>
     </Box>
         </Paper>
       </Grid>
       <Grid item xs={0} md={2} />
+      {info.status!==''? (<Box sx={{ width: '60%',position:'fixed',left:'20px',bottom:'10px'}}>
+
+<Alert
+
+severity={info.status==='failed'?"error":"success"}
+  action={
+    <IconButton
+      aria-label="close"
+      color="inherit"
+      size="small"
+      onClick={() => {
+        setInfo({status:'',message:''});
+      }}
+    >
+      <CloseIcon fontSize="inherit" />
+    </IconButton>
+  }
+  sx={{ mb: 2 }}
+> <AlertTitle>Reissue request send {info.status}</AlertTitle>
+
+  {info.message}
+</Alert>
+
+</Box>):<></>}
     </Grid>
   )
 }

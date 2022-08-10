@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-
 import Preloader from "../components/Pre-loader/Preloader";
   const AuthContext = React.createContext();
   
@@ -10,24 +9,49 @@ import Preloader from "../components/Pre-loader/Preloader";
   
   export default function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
+   
     const [auth, setAuth] = useState();
-
+   const [searchTerm,setSearchTerm]= useState('all');
     const [currentUser, setCurrentUser] = useState({});
     const [accessToken,setAccessToken]= useState('')
-    axios.defaults.baseURL = 'http://localhost:8080/api/student/';
+    axios.defaults.baseURL = 'https://warm-sea-39505.herokuapp.com/api/student/';
    
-  
+   
+     const checkUser=()=>{
+      const userID= JSON.parse(window.localStorage.getItem('userID'));
+      console.log(userID);
 
+      if(userID!==null){
+        axios.get(`getuser/${userID}`).then((res) => {
+          setCurrentUser({...res.data.user});
+          setAuth(true);
+          setLoading(false)
+
+        }).catch((e)=>{
+          setCurrentUser({});
+          setAuth(false);
+          setLoading(false)
+
+        })
+
+      }
+      else{
+        setAuth(false);
+        setLoading(false)
+
+      }
+     }
     useEffect(() => {
-      isAuth().then(res => {
-        console.log(res);
-        console.log(currentUser);
-        setLoading(false);
-        setAuth(res);
-      })
+      // isAuth().then(res => {
+      //   // console.log(res);
+      //   console.log(currentUser);
+      //   setLoading(false);
+      //   setAuth(res);
+      // })
+      checkUser()
     },[auth,accessToken]) 
     
-
+    
 
 
  
@@ -38,7 +62,6 @@ import Preloader from "../components/Pre-loader/Preloader";
       } else {
           return new Promise(resolve => {
             axios.post('refresh-token', {}, {credentials: 'include', withCredentials: true}).then((res) => {
-              console.log(res.data['AccessToken']);
               setAccessToken(`Bearer ${res.data['AccessToken']}`);
               axios.defaults.headers.common['Authorization'] = `Bearer ${res.data['AccessToken']}`;
               setAccessToken(`Bearer ${res.data['AccessToken']}`);
@@ -47,11 +70,9 @@ import Preloader from "../components/Pre-loader/Preloader";
 
               axios.get('getuser').then((res) => {
                 setCurrentUser({...res.data.user});
-                console.log(res.data);
                 setAuth(true)
                 resolve(true);
               }).catch(error=>{
-                console.log(error.response.data)
                 setAccessToken('');
                 setAuth(false)
                 setCurrentUser({});
@@ -64,7 +85,6 @@ import Preloader from "../components/Pre-loader/Preloader";
               setCurrentUser({});
               setAuth(false)
               axios.defaults.headers.common['Authorization'] = '';
-              console.log(error.response.data)
               resolve(false);
 
             })  
@@ -98,6 +118,8 @@ import Preloader from "../components/Pre-loader/Preloader";
           setAccessToken(`Bearer ${response.data['AccessToken']}`);
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data['AccessToken']}`;
         setAuth(true);
+        window.localStorage.setItem('userID', JSON.stringify(response.data.userID));
+
       }
       return response.data;
       }
@@ -115,6 +137,7 @@ import Preloader from "../components/Pre-loader/Preloader";
           setAccessToken(`Bearer ${response.data['AccessToken']}`);
           axios.defaults.headers.common['Authorization'] = `Bearer ${response.data['AccessToken']}`;
           setAuth(true);
+          window.localStorage.setItem('userID', JSON.stringify(response.data.userID));
         }
         return response.data;
       }
@@ -126,22 +149,26 @@ import Preloader from "../components/Pre-loader/Preloader";
 
     // logout function
     async function logout( ) {
-      try{
-        const response= await axios.post('logout',{}, {credentials: 'include',withCredentials: true});
-        if(response.status === 200){
-          setAccessToken('');
-          setCurrentUser({});
-          axios.defaults.headers.common['Authorization'] = '';
-          setAuth(false);
+      // try{
+      //   const response= await axios.post('logout',{}, {credentials: 'include',withCredentials: true});
+      //   if(response.status === 200){
+      //     setAccessToken('');
+      //     setCurrentUser({});
+      //     axios.defaults.headers.common['Authorization'] = '';
+      //     setAuth(false);
 
-        }
-        console.log(currentUser);
-      return response.data;
-      }
-      catch(error){
-      console.log(error);
-        return   error.response.data || error.message;
-      }
+      //   }
+      //   console.log(currentUser);
+      // return response.data;
+      // }
+      // catch(error){
+      // console.log(error);
+      //   return   error.response.data || error.message;
+      // }
+    
+      window.localStorage.removeItem('userID');
+      setAuth(false);
+    
     }
 
     async function sendUserPasswordResetEmail( datas={}) {
@@ -159,18 +186,17 @@ import Preloader from "../components/Pre-loader/Preloader";
     async function userPasswordReset( id,token,datas={}) {
       try{
         const res= await axios.post(`/reset-password/${id}/${token}/`,datas, {credentials: 'include',withCredentials: true});
-        // if (res.status===201){
-        //   // navigate('/login/')
-        // }
-        console.log(res.data);
+        
       return res.data;
       }
       catch(error){
-      console.log(error);
+      
         return   error.response.data || error.message;
       }
     }
 
+
+    
 
 
     const value = {
@@ -182,7 +208,9 @@ import Preloader from "../components/Pre-loader/Preloader";
       login,
       logout,
       sendUserPasswordResetEmail,
-      userPasswordReset
+      userPasswordReset,
+      currentUser,
+      searchTerm,setSearchTerm
     };
   
     return (

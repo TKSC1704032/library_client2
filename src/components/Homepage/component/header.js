@@ -23,13 +23,74 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import SearchIcon from '@mui/icons-material/Search';
+import InputBase from '@mui/material/InputBase';
+import { alpha, styled } from '@mui/material/styles';
 import { useAuth } from "../../../contexts/authContext";
+import BookMenu from "./bookMenu";
+
+
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 const pages = ["Issued Books", "Re-Issue-Books", "ContactUs"];
 const settings = ["Profile", "History", "Logout"];
 
 const ResponsiveAppBar = ({handleOpenNotification}) => {
+  const {auth,logout,setSearchTerm,setBookLoad,currentUser}=useAuth();
+
+  const handleSearch = (e) => {
+    
+    let tempSearchTerm = e.target.value.trim();
+    if((tempSearchTerm.replace(/[^\w\s]/gi,"")).length === 0){
+      setSearchTerm("all");
+    } else {
+      setSearchTerm(e.target.value.trim());
+      setBookLoad(true);
+    }
+    console.log(e.target.value.trim());
+  }; 
+
    const navigate=useNavigate();
-   const {logout}=useAuth();
+   
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -58,7 +119,7 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
         {pages.map((text, index) => (
           <>
             <ListItem button key={text}>
-              <ListItemIcon>
+              <ListItemIcon onClick={()=>{navigate(`/${text}/`)}}>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
               <ListItemText primary={text} />
@@ -66,7 +127,7 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
             <Divider />
           </>
         ))}
-        <ListItem button key="Notification">
+        <ListItem button key="Notification" onClick={()=>{navigate(`/notification/`)}}>
           <ListItemIcon>
             <Badge badgeContent={4} color="primary">
               <NotificationsIcon color="action" />
@@ -94,16 +155,16 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={{position:'sticky',left:"-2px",top:'-2px', zIndex:'999'}}>
       <Container maxWidth="xl">
-        <Toolbar disableGutters>
+        <Toolbar disableGutters sx={{display:'flex',flexDirection:'row',justifyContent:'space-between',flexWrap:'wrap'}}>
           <Link to='/' className="textnone">
 
           <Typography
             variant="h6"
             noWrap
             component="div"
-            sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
+            sx={{ mr: 2, display: { xs: "none", md: "flex" },justifyItems:'start' }}
           >
           ONLINE LIBRARY
           </Typography>
@@ -141,7 +202,7 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
             ONLINE LIBRABY
           </Typography>
           </Link>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+          {auth&&<><Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
               <Link to={`/${page}/`} className="textnone ">
               <Button
@@ -160,7 +221,7 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
               sx={{ my: 2, color: "white", display: "block" }}
             >
               Notifications
-              <Badge badgeContent={4} color="secondary">
+              <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon color="action" />
               </Badge>
             </Button>
@@ -168,13 +229,24 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
            
 
           </Box>
+          <BookMenu/></>}
 
+          <Search sx={{marginRight:"15px"}}>
+            <SearchIconWrapper >
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' } } onChange={handleSearch} type="search"
+            />
+          </Search>
+          {auth&&
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt="Tusher Kumar Saha"
-                  src={process.env.PUBLIC_URL + "/Image/avatar.jpg"}
+                  alt={currentUser.fname}
+                  src={currentUser.avatar}
                 />
               </IconButton>
             </Tooltip>
@@ -197,18 +269,17 @@ const ResponsiveAppBar = ({handleOpenNotification}) => {
                  <MenuItem onBlur={handleCloseUserMenu}>
                   <Link to='/profile/'>Profile</Link>
                 </MenuItem>
-                <MenuItem onBlur={handleCloseUserMenu}>
-                  <Typography textAlign="center" >History</Typography>
-                </MenuItem>
                 <MenuItem  onBlur={handleCloseUserMenu}>
                 <Typography textAlign="center" onClick={async()=>{
-                const data= await logout();
-                console.log(data);
+                 logout();
+                
+                  navigate('/login/')
+                
                 
                 }} >Logout</Typography>
                 </MenuItem>
             </Menu>
-          </Box>
+          </Box>}
         </Toolbar>
       </Container>
     </AppBar>

@@ -1,6 +1,9 @@
+import BeenhereIcon from '@mui/icons-material/Beenhere';
+import CloseIcon from '@mui/icons-material/Close';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import SearchIcon from '@mui/icons-material/Search';
-import { AppBar, Box, Button, Container, Grid, List, Paper, Toolbar } from "@mui/material";
+import { LoadingButton } from '@mui/lab';
+import { Alert, AlertTitle, AppBar, Box, Button, Container, Grid, IconButton, List, Paper, TextField, Toolbar } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import InputBase from '@mui/material/InputBase';
@@ -55,10 +58,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function StudentsInfo() {
+export default function ReturnBook() {
+    const [loading, setLoading] = useState(false);
+ const [info, setInfo] = useState({status:'',message:''});
   const [searchTerm,setSearchTerm]=useState('all');
   const [  load,setLoad  ]=useState(false);
-  const [students,setStudents]=useState([]);
+  const [issuedBooks,setIssuedBooks]=useState([]);
+  const [fine,setFine]= useState({});
   const handleSearch = (e) => {
     
     let tempSearchTerm = e.target.value.trim();
@@ -70,22 +76,28 @@ export default function StudentsInfo() {
     }
     console.log(e.target.value.trim());
   }; 
- useEffect(()=>{
-  setLoad(true);
-  axios.post('https://warm-sea-39505.herokuapp.com/api/admin/find-students/',{"searchTerm":searchTerm},
-  {credentials: 'include',withCredentials: true}
-  ).then((res)=>{
-  setLoad(false);
 
-  console.log(res.data.students)
-  setStudents(res.data.students);
-  }).catch(e=>{
+  const getIssueRequest= ()=>{
+    setLoad(true);
+    axios.post('https://warm-sea-39505.herokuapp.com/api/admin/findAllIssueRequestbySearch/',{"searchTerm":searchTerm},
+    {credentials: 'include',withCredentials: true}
+    ).then((res)=>{
     setLoad(false);
-    setStudents([]);
-  console.log(e);
-  })
+  
+    setIssuedBooks(res.data.issuedBooks);
+    }).catch(e=>{
+      setLoad(false);
+      setIssuedBooks([]);
+    console.log(e);
+    })
+  }
+ useEffect(()=>{
+    getIssueRequest()
  },[searchTerm])
-
+ const isNumber = function isNumber(value) 
+ {
+    return typeof value === 'number' && isFinite(value);
+ }
 
   return (
     <Grid container spacing={1} direction="row">
@@ -97,7 +109,7 @@ export default function StudentsInfo() {
       <AppBar position="static" sx={{padding:"10px"}} >
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{display:'flex',flexDirection:'row',justifyContent:'space-between', flexWrap: 'wrap'}}>
-        <Typography variant="h4">Students Information</Typography>
+        <Typography variant="h4">Issued Books</Typography>
 
 <Search>
       <SearchIconWrapper >
@@ -126,15 +138,15 @@ export default function StudentsInfo() {
         <List
           sx={{ width: "100%", bgcolor: "background.paper" }}
         >
-            {load?<h2>Loading...</h2>:!load&&(students.length>0)?students.map((s,index)=>{
+            {load?<h2>Loading...</h2>:!load&&(issuedBooks.length>0)?issuedBooks.map((s,index)=>{
               
              return <>
                <ListItem alignItems="flex-start">
             <ListItemAvatar>
-              <Avatar alt={s.fname} src={s.avatar} />
+              <Avatar alt={s.userID.fname} src={s.userID.avatar} />
             </ListItemAvatar>
             <ListItemText
-              primary={`${s.fname} ${s.lname}`}
+              primary={`${s.userID.fname} ${s.userID.lname}`}
               secondary={
                 <React.Fragment>
                   <Typography
@@ -143,19 +155,72 @@ export default function StudentsInfo() {
                     variant="body2"
                     color="text.primary"
                   >
-                    {`Roll: ${s.roll} , Dept: ${s.dept}, Series:${s.series}`}
+                    {`Roll: ${s.userID.roll} , Dept: ${s.userID.dept}, Series:${s.userID.series}`}
                   </Typography>
-                  {s.issuedBooks.filter((i)=>{
-                   return i.request_accepted===true
-                  }).map((i)=>{
-                    return <h3>{`Book name:${i.bookName}, BookID:${i.book_recognized_id} , Expire time:${i.expiration_date} `}</h3>
-                  })}
-                  {s.issuedBooks.filter((i)=>{
-                   return i.request_accepted===false
-                  }).map((i)=>{
-                    return <h3>{`Book name:${i.bookName}, BookID:${i.book_recognized_id} , request pending`}</h3>
-                  })}
+                  <h3>{`Book name:${s.bookName}, BookID:${s.book_recognized_id} , Expiration Date:${s.expiration_date}`}</h3>
+                   <div>
+                   <TextField
+                  id={s._id}
+                  name={s._id}
+                  label="Fine:"
+                  fullWidth
+                  margin="normal"
+                  variant="outlined"
+                  value={fine[s._id]}
+                  required
+                  onChange={
+                    (e)=>{
+                        setFine((prev)=>{
+                            return { ...prev,[e.target.name]:e.target.value}
+                        })}}
+                />
+                <br/>
 
+                <LoadingButton
+                 sx={{marginRight:"20px"}}
+                  type="button"
+                  size="small"
+                  startIcon={<BeenhereIcon/>}
+                  loading={loading}
+                  loadingPosition="end"
+                  color='success'variant="outlined"
+                  onClick={()=>{
+
+                    if(!isNumber(parseInt(fine[s._id]))){
+                        setInfo({status:"failed",message:"please enter number type"});
+
+                    }
+                    else{
+                    setLoading(true);
+                    
+                    axios.post("https://warm-sea-39505.herokuapp.com/api/admin/return-book/",{
+                      "requestID":s._id,
+                      "fine":fine[s._id]
+                    },
+  {credentials: 'include',withCredentials: true})
+.then(function(res){
+  
+  setLoading(false);
+
+    
+    setInfo({status:res.data.status,message:res.data.message});
+    getIssueRequest();
+
+})
+.catch(function(err){
+  setInfo({status:err.response.data.status,message:err.response.data.message});
+ 
+  setLoading(false);
+
+
+
+  console.log(err) })
+                  }}}
+                >
+                  Returned
+                </LoadingButton>
+
+                   </div>
                 </React.Fragment>
               }
             />
@@ -163,52 +228,9 @@ export default function StudentsInfo() {
           <Divider variant="inset" component="li" />
               
               </>
-            }):<h2>No students found</h2>}
+            }):<h2>No Issued Books found</h2>}
             
-          {/* <ListItem alignItems="flex-start">
-            <ListItemAvatar>
-              <Avatar alt="Fayed" src="/static/images/avatar/2.jpg" />
-            </ListItemAvatar>
-            <ListItemText
-              primary="Fayed Al Mamun"
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    sx={{ display: "block" }}
-                    component="span"
-                    variant="body2"
-                    color="text.primary"
-                  >
-                    Roll: 1704032 , Dept: ETE, Series:17
-                  </Typography>
-                  <h3>Borrow Request:01 ,Borrowed Books:2 , Expire time:11/07/2022 </h3>
-                </React.Fragment>
-              }
-            />
-          </ListItem>
-          <Divider variant="inset" component="li" />
-          <ListItem alignItems="flex-start">
-            <ListItemAvatar>
-              <Avatar alt="Mehedi" src="/static/images/avatar/3.jpg" />
-            </ListItemAvatar>
-            <ListItemText
-              primary="Mehedi Hasan"
-              secondary={
-                <React.Fragment>
-                  <Typography
-                    sx={{ display: "Block" }}
-                    component="span"
-                    variant="body2"
-                    color="text.primary"
-                  >
-                    Roll: 1704032 , Dept: ETE, Series:17
-                  </Typography>
-                  <h3>Borrow Request:01 ,Borrowed Books:2 , Expire time:11/07/2022 </h3>
-
-                </React.Fragment>
-              }
-            />
-          </ListItem> */}
+          
         </List>
         <Box sx={{ p: 2, border: '1px dashed grey' }}>
       <Button endIcon={<HourglassBottomIcon/>}>load more</Button>
@@ -216,6 +238,30 @@ export default function StudentsInfo() {
         </Paper>
       </Grid>
       <Grid item xs={0} md={2} />
+      {info.status!==''? (<Box sx={{ width: '60%',position:'fixed',left:'20px',bottom:'10px'}}>
+
+<Alert
+
+severity={info.status==='failed'?"error":"success"}
+  action={
+    <IconButton
+      aria-label="close"
+      color="inherit"
+      size="small"
+      onClick={() => {
+        setInfo({status:'',message:''});
+      }}
+    >
+      <CloseIcon fontSize="inherit" />
+    </IconButton>
+  }
+  sx={{ mb: 2 }}
+> <AlertTitle>Returned {info.status}</AlertTitle>
+
+  {info.message}
+</Alert>
+
+</Box>):<></>}
     </Grid>
   );
 }

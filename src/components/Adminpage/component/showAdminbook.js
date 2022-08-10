@@ -2,15 +2,14 @@ import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../../contexts/authContext";
-import Bookcard from "./bookcard";
+import { useAdmin } from "../../../contexts/adminContext";
+import AdminBookcard from "./adminBookCard";
 
-export default function Showbooks() {
+export default function AdminShowbooks() {
 
 
   
- const {searchTerm}=useAuth();
+ const {searchTerm}=useAdmin();
  const [books, setBooks] = useState([]);
  const [bookLoad,setBookLoad]=useState(true);
  const [bookMessage,setBookMessage]=useState('');
@@ -50,23 +49,9 @@ export default function Showbooks() {
       
        books.length &&books.map((book,index)=>{
         
-       return <Grid item ><Link to={`/book-details/${book._id}`} state={book}><Bookcard book={book}/> </Link></Grid>
+       return <Grid item ><AdminBookcard book={book}/></Grid>
        })}
 
-     
-         {/* <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid> */}
         
       </Grid>
       <Grid item xs={0} md={1} />

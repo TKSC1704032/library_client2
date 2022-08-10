@@ -1,5 +1,4 @@
 import { Box, Divider, Grid, Paper } from "@mui/material";
-import Avatar from '@mui/material/Avatar';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -7,8 +6,11 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import { useAuth } from '../../../contexts/authContext';
+
 export default function Issued() {
-    
+  const {currentUser}=useAuth();
+  const issuedBooks= currentUser.issuedBooks;
   return (
     <Grid container spacing={1} direction="row">
       <Grid item xs={0} md={2} />
@@ -19,21 +21,24 @@ export default function Issued() {
      
     </Box>
     <List dense sx={{ width: '100%', bgcolor: 'background.paper' }}>
-      {[0, 1, 2, 3].map((value) => {
-        const labelId = `checkbox-list-secondary-label-${value}`;
+       {issuedBooks.length===0?<h2 style={{textAlign:"center"}}>No Issued Book</h2>:
+       issuedBooks.length&&issuedBooks.map((issuedBook,index) => {
+        const labelId = `checkbox-list-secondary-label-${index}`;
         return (
           <><ListItem
-            key={value}
+            key={labelId}
             disablePadding
           >
             <ListItemButton>
               <ListItemAvatar>
-                <Avatar
-                  alt={`Avatar n°${value + 1}`}
-                  src={process.env.PUBLIC_URL + '/Image/book1.jpg'}
+                <img style={{width:'40px',padding:'5px', marginRight:'30px' ,fontSize:'10px'}}
+                  alt={`${issuedBook.bookName}`}
+                  src={`https://drive.google.com/uc?export=view&id=${issuedBook.bookCoverId}`}
                 />
               </ListItemAvatar>
-              <ListItemText id={labelId} primary=' Learning React: Functional Web Development with React and Redux' secondary='by Alex Banks (Goodreads Author), Eve Porcello'/>
+              <ListItemText id={labelId} primary={issuedBook.bookName} secondary={`by ${issuedBook.bookAuthor}`}/>
+              <p>{!issuedBook.request_accepted?"request pending":`Expiration date:${issuedBook.expiration_date}`}</p>
+
             </ListItemButton>
           </ListItem>
           <Divider/>

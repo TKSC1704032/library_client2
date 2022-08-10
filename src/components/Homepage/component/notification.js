@@ -7,9 +7,13 @@ import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
+import moment from 'moment';
 import * as React from "react";
- 
+import { useAuth } from '../../../contexts/authContext';
+
 export default function Notification() {
+  const {currentUser}=useAuth();
+  const notification= currentUser.notification;
   return (
     <Grid container spacing={1} direction="row">
       <Grid item xs={0} md={2} />
@@ -19,15 +23,20 @@ export default function Notification() {
         <Typography variant="h4">Notifications</Typography>
       <Button startIcon={<EmailIcon/>}> Mark as all read</Button>
     </Box>
+
+    
         <List
           sx={{ width: "100%", bgcolor: "background.paper" }}
         >
-          <ListItem alignItems="flex-start">
+
+          {notification.length&&notification.slice(0).reverse().map((notific,index)=>{
+      return <>
+      <ListItem alignItems="flex-start">
             <ListItemAvatar>
-              <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" />
+              <Avatar alt="Online Library" src={process.env.PUBLIC_URL + "/Image/ruet.jpg"} />
             </ListItemAvatar>
             <ListItemText
-              primary="Successfully Created Your Account"
+              primary={notific.message}
               secondary={
                 <React.Fragment>
                   <Typography
@@ -38,13 +47,17 @@ export default function Notification() {
                   >
                     Online Library
                   </Typography>
-                  {" — Now you can borrow your books..."}
+                  {`— ${moment(notific.createdAt).fromNow()}`}
                 </React.Fragment>
               }
             />
           </ListItem>
           <Divider variant="inset" component="li" />
-          <ListItem alignItems="flex-start">
+      
+      </>
+    })}
+          
+          {/* <ListItem alignItems="flex-start">
             <ListItemAvatar>
               <Avatar alt="Travis Howard" src="/static/images/avatar/2.jpg" />
             </ListItemAvatar>
@@ -86,7 +99,7 @@ export default function Notification() {
                 </React.Fragment>
               }
             />
-          </ListItem>
+          </ListItem> */}
         </List>
         <Box sx={{ p: 2, border: '1px dashed grey' }}>
       <Button endIcon={<HourglassBottomIcon/>}>load more</Button>

@@ -1,10 +1,8 @@
 import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -22,19 +20,19 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useAdmin } from '../../contexts/adminContext';
 const pages = [
   "Issue Books",
   "Re-Issue Books",
   "Add Books",
-  "Add Fine",
-  "Delete Books",
+  "ReturnBook",
   "Students-Info",
 ];
-const settings = ["Profile", "Setting", "History", "Logout"];
-
+const settings = ["Logout"];
 const AppBars = () => {
   const navigate = useNavigate();
+  const   {adminLogout} =useAdmin();
+
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -62,7 +60,7 @@ const AppBars = () => {
       <List>
         {pages.map((text, index) => (
           <>
-            <ListItem button key={text}>
+            <ListItem button key={text} onClick={()=>{navigate(`/admin/${pages[index]}/`)}}>
               <ListItemIcon>
                 {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
               </ListItemIcon>
@@ -71,14 +69,14 @@ const AppBars = () => {
             <Divider />
           </>
         ))}
-        <ListItem button key="Notification">
+        {/* <ListItem button key="Notification">
           <ListItemIcon>
             <Badge badgeContent={4} color="primary">
               <NotificationsIcon color="action" />
             </Badge>
           </ListItemIcon>
           <ListItemText primary="Notification" />
-        </ListItem>
+        </ListItem> */}
       </List>
     </Box>
   );
@@ -102,14 +100,18 @@ const AppBars = () => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          <Link to='/admin/'>
           <Typography
             variant="h6"
             noWrap
             component="div"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            ONLINE LIBRARY
+            ONLINE LIBRARY Admin
           </Typography>
+
+          </Link>
+          
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -139,7 +141,7 @@ const AppBars = () => {
               component="h6"
               sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}
             >
-              ONLINE LIBRABY
+              ONLINE LIBRABY Admin
             </Typography>
           </Link>
 
@@ -155,7 +157,7 @@ const AppBars = () => {
                 {page}
               </Button>
             ))}
-            <Button
+            {/* <Button
               key="Notification"
               onClick={() => {
                 navigate("/admin/notification");
@@ -166,15 +168,15 @@ const AppBars = () => {
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon color="action" />
               </Badge>
-            </Button>
+            </Button> */}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt="Tusher Kumar Saha"
-                  src={process.env.PUBLIC_URL + "/Image/avatar.jpg"}
+                  alt="Online Library"
+                  src={process.env.PUBLIC_URL + "/Image/ruet.jpg"}
                 />
               </IconButton>
             </Tooltip>
@@ -194,11 +196,16 @@ const AppBars = () => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+              
+                <MenuItem onClick={async()=>{
+                const data= await adminLogout();
+                if(data?.status==='success'){
+                  navigate('/admin-login/')
+                }
+                
+                }} >
+                  <Typography textAlign="center">Logout</Typography>
                 </MenuItem>
-              ))}
             </Menu>
           </Box>
         </Toolbar>

@@ -2,20 +2,19 @@ import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../../../contexts/authContext";
 import Bookcard from "./bookcard";
 
-export default function Showbooks() {
-
-
+export default function SemesterBook() {
+const {currentUser} =useAuth();
+let { sem } = useParams();
   
- const {searchTerm}=useAuth();
  const [books, setBooks] = useState([]);
  const [bookLoad,setBookLoad]=useState(true);
  const [bookMessage,setBookMessage]=useState('');
  useEffect(()=>{
-  axios.post("https://warm-sea-39505.herokuapp.com/api/student/find-books/",{searchTerm:searchTerm},
+  axios.get(`https://warm-sea-39505.herokuapp.com/api/student/find-sem-books/${currentUser.dept}/${sem}/`,
   {credentials: 'include',withCredentials: true})
 .then(function(res){
   
@@ -34,12 +33,12 @@ export default function Showbooks() {
   setBookMessage("failed")
 
   console.log(err) })
- },[searchTerm])
+ },[sem])
   return (
     <Grid container direction='column' sx={{marginTop:'10px',paddingBottom:'50px',paddingTop:'40px',backgroundColor:'white'}}>
      <Grid item container xs={12} md={12}  direction="row" >
       <Grid item xs={0} md={1} />
-      <Grid item xs={12} md={10} ><Typography sx={{paddingLeft:'50px'}} variant='h6'>Your Searched Results</Typography></Grid>
+      <Grid item xs={12} md={10} ><Typography sx={{paddingLeft:'50px'}} variant='h6'>{`Department of ${currentUser.dept} semester ${sem} books`}</Typography></Grid>
       <Grid item xs={0} md={1} />
       </Grid>
       <Grid item container xs={12} md={12} direction="row" >
@@ -50,23 +49,8 @@ export default function Showbooks() {
       
        books.length &&books.map((book,index)=>{
         
-       return <Grid item ><Link to={`/book-details/${book._id}`} state={book}><Bookcard book={book}/> </Link></Grid>
+       return <Grid item key={book._id}><Link to={`/book-details/${book._id}`} state={book}><Bookcard book={book}/> </Link></Grid>
        })}
-
-     
-         {/* <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid>
-         <Grid item ><Link to='/book-details/'><Bookcard /> </Link></Grid> */}
         
       </Grid>
       <Grid item xs={0} md={1} />

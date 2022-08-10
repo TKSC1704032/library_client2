@@ -1,6 +1,9 @@
+import CloseIcon from '@mui/icons-material/Close';
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { Grid, IconButton, Paper, TextField } from "@mui/material";
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
@@ -11,10 +14,12 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/authContext";
+
 import classes from "../../style/loginpage.module.css";
 export default function StudentLogin () {
  let navigate = useNavigate();
  const {login}=useAuth();
+ const [info, setInfo] = React.useState({status:'',message:''});
 
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => {
@@ -25,12 +30,24 @@ export default function StudentLogin () {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-  const [verified, setVerified] = React.useState(false);
-  const [message, setMessage] = React.useState({
-    warning: null,
-    error: null,
-    success: null,
-  });
+  const emailPattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
+  const [message,setMessage]=React.useState('');
+  const handleEmailValidation=()=>{
+    if (details.email===''){
+      setMessage("");
+    }
+
+    else if (!emailPattern.test(details.email)) {
+      setMessage("Invalid email. Please correct it.");
+    } else {
+      setMessage("");
+    }
+
+  }
+
+
+  
   const [details, setDetails] = React.useState({
     email: '',
     password: '',
@@ -40,7 +57,7 @@ export default function StudentLogin () {
     setDetails((prev) => {
       return {
         ...prev,
-        [e.target.name]:e.target.value,
+        [e.target.name]:e.target.value.trim(),
       };
     });
   };
@@ -58,13 +75,15 @@ export default function StudentLogin () {
               onSubmit={async(e) => {
                 e.preventDefault();
                 console.log(details);
+                if(message===''){
                 const data= await login(details);
+                setInfo({status:data.status,message:data.message});
                 console.log(data);
                 if(data.status==='success'){
                 
-                  // navigate('/');
+                  navigate('/');
                 }
-                
+              }
               }} >
               <div>
                 <TextField
@@ -76,8 +95,18 @@ export default function StudentLogin () {
                   variant="outlined"
                   value={details.email}
                   required
-                  onChange={updateDetails}
+                  onChange={
+                    (e)=>{
+                      updateDetails(e);
+                      handleEmailValidation();
+                    }}
+                    onBlur={handleEmailValidation}
                 />
+                {message !== "" ? (
+                  <p style={{ color: "red", fontSize: "12px" }}>
+                    {message}
+                  </p>
+                ) : <></>}
               </div>
               <div>
                 <FormControl fullWidth variant="outlined">
@@ -118,6 +147,30 @@ export default function StudentLogin () {
         <Grid item xs={false} md={2} />
       </Grid>
       </Paper>
+      {info.status!==''? (<Box sx={{ width: '60%',position:'fixed',left:'20px',bottom:'10px'}}>
+
+        <Alert
+        
+        severity={info.status==='failed'?"error":"success"}
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setInfo({status:'',message:''});
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        > <AlertTitle>Login {info.status}</AlertTitle>
+
+          {info.message}
+        </Alert>
+      
+    </Box>):<></>}
     </Box>
   );
 }

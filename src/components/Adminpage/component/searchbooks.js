@@ -2,10 +2,21 @@ import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
+import { useAdmin } from '../../../contexts/adminContext';
 import classes from '../../../style/searchbar.module.css';
-
 export default function SearchBooks() {
-  
+  const {setSearchTerm}=useAdmin();
+ 
+  const handleSearch = (e) => {
+    
+    let tempSearchTerm = e.target.value.trim();
+    if((tempSearchTerm.replace(/[^\w\s]/gi,"")).length === 0){
+      setSearchTerm("all");
+    } else {
+      setSearchTerm(e.target.value.trim());
+    }
+    console.log(e.target.value.trim());
+  }; 
 
   return (
       
@@ -15,7 +26,7 @@ export default function SearchBooks() {
             <Grid container item direction="row">
                 <Grid item xs={1} md={2}/>
                 <Grid item xs={10} md={8} className={classes.searchContainer}>
-                <input className={classes.search} type="search" id="search"  placeholder='Search...'/>
+                <input className={classes.search} type="search" id="search" onChange={handleSearch}  placeholder='Search...'/>
           <Button className={classes.button} variant="contained" endIcon={<SearchIcon/>}/>
 
         </Grid>
