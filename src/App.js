@@ -56,8 +56,6 @@ function App() {
 
     </Route>
         
-        
-        
         <Route path="/" element={ <Homepage/>}>
         <Route path="/" element={ <Showbooks/>}/>
         </Route>

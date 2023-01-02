@@ -54,7 +54,7 @@ export default function Reissue() {
                   onClick={()=>{
                     setLoading(true);
                     
-                    axios.post("https://warm-sea-39505.herokuapp.com/api/student/re-issue-book-request/",{
+                    axios.post("http://localhost:8080/api/student/re-issue-book-request/",{
                       "requestID":book._id
                     },
   {credentials: 'include',withCredentials: true})

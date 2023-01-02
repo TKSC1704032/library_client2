@@ -3,17 +3,17 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LoadingButton from "@mui/lab/LoadingButton";
 import {
-  Alert,
-  AlertTitle,
-  Box,
-  Container,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  Typography
+    Alert,
+    AlertTitle,
+    Box,
+    Container,
+    FormControl,
+    Grid,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    OutlinedInput,
+    Typography
 } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
@@ -204,7 +204,7 @@ export default function Profile() {
                       formData.append("avatar", avatar);
                       axios
                         .post(
-                          "https://warm-sea-39505.herokuapp.com/api/student/change-avatar/",
+                          "http://localhost:8080/api/student/change-avatar/",
                           formData,
                           {
                             headers: { "Content-type": "multipart/form-data" },
@@ -251,7 +251,7 @@ export default function Profile() {
 
                     axios
                       .delete(
-                        `https://warm-sea-39505.herokuapp.com/api/student/remove-avatar/${currentUser._id}/`,
+                        `http://localhost:8080/api/student/remove-avatar/${currentUser._id}/`,
                         { credentials: "include", withCredentials: true }
                       )
                       .then(function (res) {
@@ -436,7 +436,7 @@ export default function Profile() {
                   ) {
                     axios
                       .post(
-                        "https://warm-sea-39505.herokuapp.com/api/student/refresh-token/",
+                        "http://localhost:8080/api/student/refresh-token/",
                         {},
                         { credentials: "include", withCredentials: true }
                       )
@@ -444,7 +444,7 @@ export default function Profile() {
 
                         axios
                         .post(
-                          `https://warm-sea-39505.herokuapp.com/api/student/changepassword/${currentUser._id}`,
+                          `http://localhost:8080/api/student/changepassword/${currentUser._id}`,
                           details,
                           {
                             headers: { "Authorization":`Bearer ${res.data["AccessToken"]}` },
