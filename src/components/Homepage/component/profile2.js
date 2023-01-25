@@ -204,7 +204,7 @@ export default function Profile() {
                       formData.append("avatar", avatar);
                       axios
                         .post(
-                          "http://localhost:8080/api/student/change-avatar/",
+                          "https://ruetonlineservice.onrender.com/api/student/change-avatar/",
                           formData,
                           {
                             headers: { "Content-type": "multipart/form-data" },
@@ -251,7 +251,7 @@ export default function Profile() {
 
                     axios
                       .delete(
-                        `http://localhost:8080/api/student/remove-avatar/${currentUser._id}/`,
+                        `https://ruetonlineservice.onrender.com/api/student/remove-avatar/${currentUser._id}/`,
                         { credentials: "include", withCredentials: true }
                       )
                       .then(function (res) {
@@ -436,7 +436,7 @@ export default function Profile() {
                   ) {
                     axios
                       .post(
-                        "http://localhost:8080/api/student/refresh-token/",
+                        "https://ruetonlineservice.onrender.com/api/student/refresh-token/",
                         {},
                         { credentials: "include", withCredentials: true }
                       )
@@ -444,7 +444,7 @@ export default function Profile() {
 
                         axios
                         .post(
-                          `http://localhost:8080/api/student/changepassword/${currentUser._id}`,
+                          `https://ruetonlineservice.onrender.com/api/student/changepassword/${currentUser._id}`,
                           details,
                           {
                             headers: { "Authorization":`Bearer ${res.data["AccessToken"]}` },
